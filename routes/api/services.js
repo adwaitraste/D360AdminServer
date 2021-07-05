@@ -46,7 +46,7 @@ router.get("/getSalesGroups/", (req, res) =>{
 
 router.get("/getUserFullnamesAndID/", (req, res) =>{    
     db.all(
-        "SELECT id, FirstName, LastName FROM Users",
+        "SELECT id, FirstName, LastName FROM Users WHERE isDeleted = 0",
         (err, result) => {
             if (err) 
             {

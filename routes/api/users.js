@@ -66,33 +66,33 @@ function validateAddUser(reqBody)
         }
     }
 
-    if(!reqBody.SalesPersonID)
-    {
-        let error = new myError(MissingEntry, "SalesPersonID");
-        errorObject.push(error);
-    }
-    else
-    {
-        if(!wholeNumberPattern.test(reqBody.SalesPersonID))
-        {
-            let error = new myError(InvalidEntry, "SalesPersonID");
-            errorObject.push(error);
-        }
-    }
+    // if(!reqBody.SalesPersonID)
+    // {
+    //     let error = new myError(MissingEntry, "SalesPersonID");
+    //     errorObject.push(error);
+    // }
+    // else
+    // {
+    //     if(!wholeNumberPattern.test(reqBody.SalesPersonID))
+    //     {
+    //         let error = new myError(InvalidEntry, "SalesPersonID");
+    //         errorObject.push(error);
+    //     }
+    // }
 
-    if(!reqBody.DesignerID)
-    {
-        let error = new myError(MissingEntry, "DesignerID");
-        errorObject.push(error);
-    }
-    else
-    {
-        if(!wholeNumberPattern.test(reqBody.DesignerID))
-        {
-            let error = new myError(InvalidEntry, "DesignerID");
-            errorObject.push(error);
-        }
-    }
+    // if(!reqBody.DesignerID)
+    // {
+    //     let error = new myError(MissingEntry, "DesignerID");
+    //     errorObject.push(error);
+    // }
+    // else
+    // {
+    //     if(!wholeNumberPattern.test(reqBody.DesignerID))
+    //     {
+    //         let error = new myError(InvalidEntry, "DesignerID");
+    //         errorObject.push(error);
+    //     }
+    // }
 
     if(!reqBody.SalesOfficeID)
     {
@@ -216,26 +216,36 @@ router.put("/editUser/:id", (req, res) =>{
     let reqBody = req.body;
     let id = req.params.id;
 
-    const { FirstName, LastName, isActive, ChannelID, DesignerID, SalesPersonID, SalesOfficeID, SalesGroupID, Company, Position, Telephone, Mobile, Email } = reqBody;
-    db.run(
-        `UPDATE Users \
-        SET FirstName = ?, LastName = ?, isActive = ?, ChannelID = ?, DesignerID = ?, SalesPersonID = ?, SalesOfficeID = ?, SalesGroupID = ?, Company = ?, Position = ?, Telephone = ?, Mobile = ?, Email = ? \
-        WHERE id = ?`,
-        [FirstName, LastName, isActive, ChannelID, DesignerID, SalesPersonID, SalesOfficeID, SalesGroupID, Company, Position, Telephone, Mobile, Email, id],
-        (err, result) => {
-            if (err) 
-            {
-                res.status(400).json({ "error": err.message })
-                return;
+    const errorObject = validateAddUser(reqBody);
+
+    if(errorObject.length == 0)
+    {
+        const { FirstName, LastName, isActive, ChannelID, DesignerID, SalesPersonID, SalesOfficeID, SalesGroupID, Company, Position, Telephone, Mobile, Email } = reqBody;
+        db.run(
+            `UPDATE Users \
+            SET FirstName = ?, LastName = ?, isActive = ?, ChannelID = ?, DesignerID = ?, SalesPersonID = ?, SalesOfficeID = ?, SalesGroupID = ?, Company = ?, Position = ?, Telephone = ?, Mobile = ?, Email = ? \
+            WHERE id = ?`,
+            [FirstName, LastName, isActive, ChannelID, DesignerID, SalesPersonID, SalesOfficeID, SalesGroupID, Company, Position, Telephone, Mobile, Email, id],
+            (err, result) => {
+                if (err) 
+                {
+                    res.status(400).json({ "error": err.message })
+                    return;
+                }
+                res.status(201).send(reqBody);
             }
-            res.status(201).send(reqBody);
-        }
-    );
+        );
+    }
+    else
+    {
+        res.status(400).send(errorObject);
+    }
+
 })
 
 router.get("/getUsers/", (req, res) =>{    
     db.all(
-        "SELECT * FROM Users",
+        "SELECT * FROM Users WHERE isDeleted = 0",
         (err, result) => {
             if (err) 
             {
